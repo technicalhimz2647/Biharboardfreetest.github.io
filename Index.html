@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>बिहार बोर्ड 2026 - फ्री MCQ टेस्ट और नोट्स</title>
+  <style>
+    body {font-family: 'Segoe UI', Arial; background: #f0f2f5; margin:0; padding:20px;}
+    .container {max-width: 900px; margin: auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
+    h1 {text-align:center; color: #1a73e8;}
+    .subjects {display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 20px; margin-top: 30px;}
+    .subject-card {background: #1a73e8; color: white; padding: 25px; border-radius: 12px; text-align: center; font-size: 20px; cursor: pointer; transition: 0.3s;}
+    .subject-card:hover {transform: scale(1.05); background: #0d47a1;}
+    .chapters {margin-top: 30px;}
+    .chapter {background: #e8f0fe; padding: 15px; margin: 10px 0; border-radius: 8px;}
+    .back {text-align: center; margin: 20px;}
+    button {padding: 12px 25px; font-size: 16px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer;}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>बिहार बोर्ड कक्षा 10th & 12th 2026</h1>
+  <p style="text-align:center; font-size:18px;">फ्री ऑनलाइन MCQ टेस्ट और PDF नोट्स</p>
+
+  <div class="subjects" id="home">
+    <div class="subject-card" onclick="showSubject('hindi')">हिंदी</div>
+    <div class="subject-card" onclick="showSubject('english')">अंग्रेजी</div>
+    <div class="subject-card" onclick="showSubject('math')">गणित</div>
+    <div class="subject-card" onclick="showSubject('science')">विज्ञान</div>
+    <div class="subject-card" onclick="showSubject('sst')">सामाजिक विज्ञान</div>
+    <div class="subject-card" onclick="showSubject('sanskrit')">संस्कृत</div>
+  </div>
+
+  <div id="subject-page" style="display:none;">
+    <div class="back><button onclick="location.reload()">← होम पेज</button></div>
+    <h2 id="subject-name"></h2>
+    <div class="chapters" id="chapter-list"></div>
+  </div>
+</div>
+
+<script>
+const data = {
+  hindi: [
+    {name: "गद्य खंड", test: "GOOGLE_FORM_LINK", notes: "GOOGLE_DRIVE_PDF_LINK"},
+    {name: "पद्य खंड", test: "GOOGLE_FORM_LINK", notes: "GOOGLE_DRIVE_PDF_LINK"},
+    // बाकीचे सारे चैप्टर डाल देना
+  ],
+  english: [
+    {name: "Prose", test: "", notes: ""},
+    {name: "Poetry", test: "", notes: ""}
+  ],
+  math: [
+    {name: "वास्तविक संख्याएँ", test: "", notes: ""},
+    {name: "बहुपद", test: "", notes: ""}
+  ],
+  science: [
+    {name: "रासायनिक अभिक्रियाएँ", test: "", notes: ""},
+    {name: "प्रकाश", test: "", notes: ""}
+  ],
+  sst: [
+    {name: "भारत के संसाधन", test: "", notes: ""},
+    {name: "लोकतंत्र", test: "", notes: ""}
+  ],
+  sanskrit: [
+    {name: "प्रथमोऽध्यायः", test: "", notes: ""}
+  ]
+};
+
+function showSubject(sub) {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("subject-page").style.display = "block";
+  document.getElementById("subject-name").innerText = 
+    sub === "hindi" ? "हिंदी" :
+    sub === "english" ? "अंग्रेजी" :
+    sub === "math" ? "गणित" :
+    sub === "science" ? "विज्ञान" :
+    sub === "sst" ? "सामाजिक विज्ञान" : "संस्कृत";
+
+  let list = "";
+  data[sub].forEach(ch => {
+    list += `
+      <div class="chapter">
+        <h3>${ch.name}</h3>
+        <p>
+          <a href="${ch.test}" target="_blank"><button>ऑनलाइन MCQ टेस्ट दें</button></a> &nbsp;
+          <a href="${ch.notes}" target="_blank"><button style="background:#34a853;">नोट्स डाउनलोड करें (PDF)</button></a>
+        </p>
+      </div>`;
+  });
+  document.getElementById("chapter-list").innerHTML = list;
+}
+</script>
+
+</body>
+</html>
