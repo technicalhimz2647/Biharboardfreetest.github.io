@@ -1,4 +1,4 @@
-// Bihar Board 2026 - Complete JavaScript Functions
+// Bihar Board 2026 - Complete JavaScript Functions (Fixed Version)
 
 // Global Variables
 let currentSubject = '';
@@ -31,7 +31,7 @@ async function loadQuestions(subject, chapterNum, testNum) {
         return true;
     } catch (error) {
         console.error('Error loading questions:', error);
-        alert('⚠️ इस test के questions अभी उपलब्ध नहीं हैं। कृपया बाद में try करें।');
+        alert('⚠️ इस test के questions अभी उपलब्ध नहीं हैं।\n\nकृपया बाद में try करें।\n\nFile needed: ' + fileName);
         return false;
     }
 }
@@ -63,10 +63,16 @@ function closeModal() {
 async function startTest(testNumber) {
     currentTestNumber = testNumber;
     
+    // Show loading message
+    const modal = document.getElementById('test-modal');
+    const originalContent = modal.innerHTML;
+    modal.innerHTML = '<div class="modal-content"><h2>⏳ Loading questions...</h2><p>कृपया प्रतीक्षा करें...</p></div>';
+    
     // Load questions
     const loaded = await loadQuestions(currentSubject, currentChapterNumber, testNumber);
     
     if (!loaded) {
+        modal.innerHTML = originalContent;
         closeModal();
         return;
     }
@@ -80,8 +86,18 @@ async function startTest(testNumber) {
     
     // Hide modal and subject page
     closeModal();
-    document.querySelector('.chapters-container').parentElement.style.display = 'none';
-    document.getElementById('test-page').classList.remove('hidden');
+    
+    // Hide chapters container
+    const chaptersContainer = document.querySelector('.chapters-container');
+    if (chaptersContainer && chaptersContainer.parentElement) {
+        chaptersContainer.parentElement.style.display = 'none';
+    }
+    
+    // Show test page
+    const testPage = document.getElementById('test-page');
+    if (testPage) {
+        testPage.classList.remove('hidden');
+    }
     
     // Start test
     startTime = Date.now();
@@ -109,13 +125,15 @@ function updateTimerDisplay() {
     const seconds = timeLeft % 60;
     const timerElement = document.getElementById('timer');
     
-    timerElement.textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
-    
-    // Change color when time is low
-    if (timeLeft < 60) {
-        timerElement.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-    } else if (timeLeft < 180) {
-        timerElement.style.background = 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)';
+    if (timerElement) {
+        timerElement.textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Change color when time is low
+        if (timeLeft < 60) {
+            timerElement.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+        } else if (timeLeft < 180) {
+            timerElement.style.background = 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)';
+        }
     }
 }
 
@@ -124,16 +142,23 @@ function loadQuestion() {
     const question = questionsData[currentQuestionIndex];
     
     // Update question counter
-    document.getElementById('question-counter').textContent = 
-        `प्रश्न ${currentQuestionIndex + 1}/${questionsData.length}`;
+    const counterElement = document.getElementById('question-counter');
+    if (counterElement) {
+        counterElement.textContent = `प्रश्न ${currentQuestionIndex + 1}/${questionsData.length}`;
+    }
     
     // Update progress bar
     const progress = ((currentQuestionIndex + 1) / questionsData.length) * 100;
-    document.getElementById('progress-fill').style.width = progress + '%';
+    const progressElement = document.getElementById('progress-fill');
+    if (progressElement) {
+        progressElement.style.width = progress + '%';
+    }
     
     // Display question
-    document.getElementById('question-text').textContent = 
-        `${currentQuestionIndex + 1}. ${question.question}`;
+    const questionElement = document.getElementById('question-text');
+    if (questionElement) {
+        questionElement.textContent = `${currentQuestionIndex + 1}. ${question.question}`;
+    }
     
     // Display options
     const optionsHtml = question.options.map((option, index) => {
@@ -141,17 +166,26 @@ function loadQuestion() {
         return `<div class="option ${selected}" onclick="selectOption(${index})">${option}</div>`;
     }).join('');
     
-    document.getElementById('options').innerHTML = optionsHtml;
+    const optionsElement = document.getElementById('options');
+    if (optionsElement) {
+        optionsElement.innerHTML = optionsHtml;
+    }
     
     // Update navigation buttons
-    document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (prevBtn) {
+        prevBtn.disabled = currentQuestionIndex === 0;
+    }
     
     if (currentQuestionIndex === questionsData.length - 1) {
-        document.getElementById('next-btn').classList.add('hidden');
-        document.getElementById('submit-btn').classList.remove('hidden');
+        if (nextBtn) nextBtn.classList.add('hidden');
+        if (submitBtn) submitBtn.classList.remove('hidden');
     } else {
-        document.getElementById('next-btn').classList.remove('hidden');
-        document.getElementById('submit-btn').classList.add('hidden');
+        if (nextBtn) nextBtn.classList.remove('hidden');
+        if (submitBtn) submitBtn.classList.add('hidden');
     }
 }
 
@@ -188,7 +222,7 @@ function submitTest() {
     // Confirm submission
     const unanswered = userAnswers.filter(ans => ans === null).length;
     
-    if (unanswered > 0) {
+    if (unanswered > 0 && timerInterval) {
         const confirm = window.confirm(
             `⚠️ ${unanswered} प्रश्न अनुत्तरित हैं।\n\nक्या आप test submit करना चाहते हैं?`
         );
@@ -198,7 +232,9 @@ function submitTest() {
         }
     }
     
-    clearInterval(timerInterval);
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
     
     const endTime = Date.now();
     const timeTaken = Math.floor((endTime - startTime) / 1000);
@@ -218,40 +254,60 @@ function submitTest() {
 
 // Show Results
 function showResults(score, percentage, timeTaken) {
-    document.getElementById('test-page').classList.add('hidden');
-    document.getElementById('result-page').classList.remove('hidden');
+    const testPage = document.getElementById('test-page');
+    const resultPage = document.getElementById('result-page');
+    
+    if (testPage) testPage.classList.add('hidden');
+    if (resultPage) resultPage.classList.remove('hidden');
     
     // Display score
-    document.getElementById('score-display').textContent = `${score}/${questionsData.length}`;
-    document.getElementById('percentage-display').textContent = `${percentage}%`;
+    const scoreDisplay = document.getElementById('score-display');
+    const percentageDisplay = document.getElementById('percentage-display');
+    const timeTakenDisplay = document.getElementById('time-taken');
+    
+    if (scoreDisplay) {
+        scoreDisplay.textContent = `${score}/${questionsData.length}`;
+    }
+    
+    if (percentageDisplay) {
+        percentageDisplay.textContent = `${percentage}%`;
+    }
     
     // Display time taken
     const minutes = Math.floor(timeTaken / 60);
     const seconds = timeTaken % 60;
-    document.getElementById('time-taken').textContent = 
-        `समय: ${minutes} मिनट ${seconds} सेकंड`;
+    if (timeTakenDisplay) {
+        timeTakenDisplay.textContent = `समय: ${minutes} मिनट ${seconds} सेकंड`;
+    }
     
     // Display motivational message
     let message = '';
+    let cardColor = '';
+    
     if (percentage >= 90) {
         message = '🎉 शानदार! आप बहुत अच्छे हैं! ऐसे ही मेहनत करते रहें! 🌟';
-        document.querySelector('.score-card').style.background = 
-            'linear-gradient(135deg, #28a745 0%, #5cb85c 100%)';
+        cardColor = 'linear-gradient(135deg, #28a745 0%, #5cb85c 100%)';
     } else if (percentage >= 70) {
         message = '👍 बढ़िया! अच्छा प्रदर्शन! थोड़ी और मेहनत से आप और बेहतर कर सकते हैं! 💪';
-        document.querySelector('.score-card').style.background = 
-            'linear-gradient(135deg, #228B22 0%, #32CD32 100%)';
+        cardColor = 'linear-gradient(135deg, #228B22 0%, #32CD32 100%)';
     } else if (percentage >= 50) {
         message = '💪 अच्छी कोशिश! Practice जारी रखें! आप जरूर सुधार करेंगे! 📚';
-        document.querySelector('.score-card').style.background = 
-            'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)';
+        cardColor = 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)';
     } else {
         message = '📚 फिर से try करें! आप कर सकते हैं! हार मत मानिए! 🎯';
-        document.querySelector('.score-card').style.background = 
-            'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+        cardColor = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
     }
     
-    document.getElementById('motivation-msg').textContent = message;
+    const motivationMsg = document.getElementById('motivation-msg');
+    const scoreCard = document.querySelector('.score-card');
+    
+    if (motivationMsg) {
+        motivationMsg.textContent = message;
+    }
+    
+    if (scoreCard) {
+        scoreCard.style.background = cardColor;
+    }
     
     // Display detailed analysis
     displayDetailedAnalysis();
@@ -276,19 +332,34 @@ function displayDetailedAnalysis() {
         `;
     });
     
-    document.getElementById('result-details').innerHTML = detailsHtml;
+    const resultDetails = document.getElementById('result-details');
+    if (resultDetails) {
+        resultDetails.innerHTML = detailsHtml;
+    }
 }
 
 // Retry Test
 function retryTest() {
-    document.getElementById('result-page').classList.add('hidden');
+    const resultPage = document.getElementById('result-page');
+    if (resultPage) {
+        resultPage.classList.add('hidden');
+    }
+    
     showTestSelection(currentChapter, currentChapterNumber, currentSubject);
 }
 
 // Back to Chapters
 function backToChapters() {
-    document.getElementById('result-page').classList.add('hidden');
-    document.querySelector('.chapters-container').parentElement.style.display = 'block';
+    const resultPage = document.getElementById('result-page');
+    if (resultPage) {
+        resultPage.classList.add('hidden');
+    }
+    
+    // Show chapters container
+    const chaptersContainer = document.querySelector('.chapters-container');
+    if (chaptersContainer && chaptersContainer.parentElement) {
+        chaptersContainer.parentElement.style.display = 'block';
+    }
     
     // Scroll to top
     window.scrollTo(0, 0);
